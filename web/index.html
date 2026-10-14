@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lễ Thành Hầu Nguyễn Hữu Cảnh (1650–1700) | Bài Thuyết Trình Lịch Sử</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg-lacquer: #070605;
+      --gold-leaf: #d4af37;
+      --parchment: #f5f0e6;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-lacquer);
+      color: var(--parchment);
+      font-family: 'Be Vietnam Pro', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-serif-display {
+      font-family: 'Playfair Display', Georgia, serif;
+      line-height: 1.18;
+      letter-spacing: -0.01em;
+    }
+
+    .museum-grid-bg {
+      background-size: 72px 72px;
+      background-image: 
+        linear-gradient(to right, rgba(212, 175, 55, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(212, 175, 55, 0.035) 1px, transparent 1px);
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .drum-spin {
+      animation: spinSlow 150s linear infinite;
+    }
+
+    /* HUD Visibility */
+    #top-hud, #bottom-hud {
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+    }
+    .hud-hidden-top {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .hud-hidden-bottom {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Navigation Dots */
+    .nav-dot {
+      height: 10px;
+      width: 10px;
+      border-radius: 9999px;
+      background-color: #3a352f;
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .nav-dot:hover {
+      background-color: #a8a29e;
+    }
+    .nav-dot.active {
+      width: 38px;
+      background-color: var(--gold-leaf);
+      box-shadow: 0 0 14px rgba(212, 175, 55, 0.6);
+    }
+
+    /* View Transitions */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 0.55s;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes revealUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .stagger-item {
+      opacity: 0;
+      animation: revealUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .lacquer-panel {
+      background: linear-gradient(160deg, rgba(25, 21, 17, 0.96) 0%, rgba(10, 8, 7, 0.99) 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.32);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.92);
+    }
+
+    .museum-card {
+      position: relative;
+      background: rgba(22, 18, 15, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.24);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pill-active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.28), rgba(185, 28, 28, 0.22));
+      border-color: #fbbf24 !important;
+      box-shadow: 0 12px 34px -8px rgba(212, 175, 55, 0.45);
+    }
+
+    /* =========================================================================
+       SLIDE 01: TƯỢNG ĐỒNG TRUNG TÂM & TIA CHỈ ĐIỂM TUẦN TỰ
+       ========================================================================= */
+    .statue-3d-rig {
+      perspective: 1800px;
+      transform-style: preserve-3d;
+    }
+
+    .statue-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      will-change: transform, opacity, filter;
+      transition:
+        transform 0.78s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.58s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .statue-layer.is-active {
+      opacity: 1;
+      z-index: 25;
+      transform: translate3d(0, -10px, 0) scale(1.18) rotateY(0deg);
+      filter: blur(0px) brightness(1.08) contrast(1.06) drop-shadow(0 30px 50px rgba(0,0,0,0.98));
+    }
+
+    .statue-layer.is-orbit-left {
+      opacity: 0;
+      z-index: 10;
+      transform: translate3d(-165px, -10px, -260px) scale(0.92) rotateY(-55deg);
+      filter: blur(12px) brightness(0.35);
+    }
+
+    .statue-layer.is-orbit-right {
+      opacity: 0;
+      z-index: 10;
+      transform: translate3d(165px, -10px, -260px) scale(0.92) rotateY(55deg);
+      filter: blur(12px) brightness(0.35);
+    }
+
+    .statue-hero-img {
+      height: 550px;
+      width: auto;
+      max-width: none;
+      object-fit: contain;
+      object-position: center center;
+      mix-blend-mode: lighten;
+      -webkit-mask-image: radial-gradient(ellipse 92% 96% at 50% 52%, #000 86%, transparent 100%);
+      mask-image: radial-gradient(ellipse 92% 96% at 50% 52%, #000 86%, transparent 100%);
+    }
+
+    @keyframes dotPopIn {
+      0% { opacity: 0; transform: scale(0); }
+      70% { opacity: 1; transform: scale(1.25); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pulseRingOut {
+      0% { opacity: 0; transform: scale(0.6); }
+      30% { opacity: 0.95; }
+      100% { opacity: 0; transform: scale(2.3); }
+    }
+
+    .seq-dot-origin {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: dotPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) 0.28s forwards;
+    }
+    .seq-ring-origin {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: pulseRingOut 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.34s infinite;
+    }
+
+    .seq-line-seg1 {
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: drawSegment 0.20s cubic-bezier(0.4, 0, 0.2, 1) 0.36s forwards;
+    }
+
+    .seq-dot-elbow {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: dotPopIn 0.20s cubic-bezier(0.34, 1.56, 0.64, 1) 0.54s forwards;
+    }
+
+    .seq-line-seg2 {
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: drawSegment 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.56s forwards;
+    }
+
+    .seq-dot-end {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: dotPopIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) 0.72s forwards;
+    }
+
+    @keyframes drawSegment {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes plaqueRevealLeft {
+      0% { opacity: 0; transform: translateX(24px) scale(0.95); filter: blur(6px); }
+      100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0px); }
+    }
+    @keyframes plaqueRevealRight {
+      0% { opacity: 0; transform: translateX(-24px) scale(0.95); filter: blur(6px); }
+      100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0px); }
+    }
+    .plaque-pop-left {
+      opacity: 0;
+      transform-origin: right center;
+      animation: plaqueRevealLeft 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.72s forwards;
+    }
+    .plaque-pop-right {
+      opacity: 0;
+      transform-origin: left center;
+      animation: plaqueRevealRight 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.72s forwards;
+    }
+
+    .editorial-plaque {
+      position: relative;
+      background: linear-gradient(155deg, rgba(22, 18, 14, 0.96) 0%, rgba(9, 8, 6, 0.98) 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 
+        0 30px 70px -10px rgba(0, 0, 0, 0.95),
+        0 0 35px rgba(212, 175, 55, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+    }
+
+    @keyframes counterFadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .counter-balance-wing {
+      opacity: 0;
+      animation: counterFadeIn 0.6s ease 0.32s forwards;
+    }
+
+    /* =========================================================================
+       TRANG KẾT THÚC HÀO HÙNG & TỰ HÀO (OUTRO CURTAIN)
+       ========================================================================= */
+    @keyframes floatParticle {
+      0% { transform: translateY(30px) scale(0.8); opacity: 0; }
+      50% { opacity: 0.85; }
+      100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+    }
+    .gold-sparkle {
+      animation: floatParticle 5s ease-in-out infinite;
+    }
+
+    @keyframes dashMarch {
+      to { stroke-dashoffset: -40; }
+    }
+    .march-route {
+      stroke-dasharray: 8 6;
+      animation: dashMarch 2.2s linear infinite;
+    }
+
+    @keyframes slowWave {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-14px) translateY(3px); }
+    }
+    .river-wave {
+      animation: slowWave 9s ease-in-out infinite;
+    }
+
+    .vn-flag-badge {
+      background: linear-gradient(135deg, #da251d 0%, #991b1b 100%);
+      border: 1px solid rgba(253, 224, 71, 0.6);
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between museum-grid-bg">
+
+  <!-- Ambient Heritage Backdrop -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute inset-0"
+         style="background: radial-gradient(circle at 50% 46%, rgba(212, 175, 55, 0.11), transparent 60%), radial-gradient(circle at 20% 80%, rgba(185, 28, 28, 0.07), transparent 50%);">
+    </div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,#070605_95%)]"></div>
+
+    <svg class="drum-spin absolute -right-56 -bottom-56 w-[52rem] h-[52rem] opacity-[0.045] text-amber-400" viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="95" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle cx="100" cy="100" r="78" stroke="currentColor" stroke-width="0.75"/>
+      <circle cx="100" cy="100" r="58" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 4"/>
+      <circle cx="100" cy="100" r="35" stroke="currentColor" stroke-width="0.75"/>
+      <polygon points="100,72 106,92 126,92 110,104 116,124 100,112 84,124 90,104 74,92 94,92" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <!-- Top HUD -->
+  <header id="top-hud" class="hud-hidden-top relative z-30 w-full px-8 lg:px-14 py-3 flex items-center justify-between border-b border-amber-500/15 bg-stone-950/85 backdrop-blur-md">
+    <div class="flex items-center gap-3.5">
+      <div onclick="enterIntroScreen()" title="Về Sảnh Giới Thiệu Tổ" class="vn-flag-badge cursor-pointer w-10 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-105">
+        <svg class="w-5 h-5" viewBox="0 0 30 20" fill="none">
+          <polygon points="15,3.2 16.65,8.28 22,8.28 17.67,11.42 19.32,16.5 15,13.36 10.68,16.5 12.33,11.42 8,8.28 13.35,8.28" fill="#FFFF00"/>
+        </svg>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs uppercase tracking-[0.22em] text-amber-400 font-bold">Lễ Thành Hầu Nguyễn Hữu Cảnh</span>
+        <span class="hidden sm:inline-block text-xs px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">1698 • Khởi nguyên Sài Gòn – TP.HCM</span>
+      </div>
+    </div>
+
+    <nav id="slide-dots" class="flex items-center gap-2.5 bg-stone-900/90 px-4 py-2 rounded-full border border-stone-800"></nav>
+
+    <div class="flex items-center gap-2 text-xs">
+      <button onclick="enterIntroScreen()" class="px-4 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-700/80 text-stone-200 font-medium transition cursor-pointer">
+        Tổ 2
+      </button>
+      <button onclick="toggleFullScreen()" class="px-4 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-200 font-medium transition cursor-pointer">
+        ⛶ Toàn màn hình
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Stage -->
+  <main id="slide-stage" class="relative z-20 flex-1 w-full max-w-[1540px] mx-auto px-6 lg:px-12 flex items-center justify-center overflow-hidden -mt-2"></main>
+
+  <!-- Hidden Speaker Notes (Press 'N') -->
+  <aside id="speaker-notes-drawer" class="fixed bottom-16 left-8 right-8 max-w-4xl mx-auto z-40 hidden">
+    <div class="lacquer-panel p-5 rounded-2xl border border-amber-400/50 shadow-2xl">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">🎙️ Kịch bản lời nói chi tiết cho người thuyết trình</span>
+        <button onclick="toggleSpeakerNotes()" class="text-xs text-stone-400 hover:text-white cursor-pointer">✕ Đóng</button>
+      </div>
+      <p id="speaker-notes-content" class="text-sm text-stone-200 leading-relaxed"></p>
+    </div>
+  </aside>
+
+  <!-- Bottom HUD -->
+  <footer id="bottom-hud" class="hud-hidden-bottom relative z-30 w-full px-8 lg:px-14 py-3 flex items-center justify-between border-t border-amber-500/15 bg-stone-950/85 backdrop-blur-md">
+    <div class="flex items-center gap-4">
+      <span id="slide-counter" class="font-serif-display text-2xl font-bold text-amber-400">01 / 06</span>
+      <span id="slide-chapter" class="text-xs uppercase tracking-widest text-stone-300 border-l border-stone-700 pl-4 font-semibold"></span>
+    </div>
+
+    <div class="w-1/4 lg:w-1/3 h-1.5 bg-stone-800 rounded-full overflow-hidden">
+      <div id="progress-bar" class="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-red-600 transition-all duration-500"></div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button onclick="prevStep()" class="px-4 py-2 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 text-xs font-semibold transition cursor-pointer">
+        ← Trước
+      </button>
+      <button onclick="nextStep()" id="next-btn-label" class="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition shadow-lg shadow-amber-500/20 cursor-pointer">
+        Tiếp theo →
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    let viewMode = 'intro';
+    let currentSlide = 0;
+    let currentSubStep = 0;
+
+    const TEAM_MEMBERS = [
+      { name: "Mỹ Nhi", role: "Tổ trưởng" },
+      { name: "Mỹ Anh", role: "Thuyết trình" },
+      { name: "Trường Triệu", role: "Thiết Kế Slide" },
+      { name: "Phương Vy", role: "Nội dung Lịch sử" },
+      { name: "Trà My", role: "Nội dung Lịch sử" },
+      { name: "Tấn Gia Bảo", role: "Nội dung Lịch sử" },
+      { name: "Trung Tín", role: "KHÔNG LÀM GÌ" },
+      { name: "Mộng Tuyền", role: "Nội dung Lịch sử" },
+      { name: "Trúc Anh", role: "Nội dung Lịch sử" },
+      { name: "Hồ Tú Mẫn", role: "Nội dung Lịch sử" },
+      { name: "Gia Vinh", role: "Nội dung Lịch sử" },
+      { name: "Cẩm tuyền", role: "Nội dung Lịch sử" }
+    ];
+
+    const EIGHT_POINT_STAR_SVG = `
+      <svg class="w-5 h-5 text-amber-400 drop-shadow-[0_0_6px_rgba(212,175,55,0.65)]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1L14.8 8.2L22 6L17.2 12L22 18L14.8 15.8L12 23L9.2 15.8L2 18L6.8 12L2 6L9.2 8.2L12 1Z"/>
+      </svg>
+    `;
+
+    const STATUE_ORBIT_ANGLES = [
+      {
+        primarySrc: "./benphai.jpg",
+        altPng: "./benphai.png",
+        altFallback: "./image-Photoroom.jpg",
+        side: "right",
+        originX: 765,
+        originY: 225,
+        elbowX: 880,
+        elbowY: 175,
+        endX: 975,
+        endY: 175,
+        ringRotate: 38,
+        stepNum: "01",
+        stepLabel: "5 Danh Xưng",
+        kicker: "GIA PHẢ VẠN XUÂN & CHÍNH SỬ",
+        title: "5 Danh Xưng Lịch Sử",
+        items: [
+          { num: "I", label: "PHỔ BIẾN NHẤT & CHÍNH SỬ", main: "Nguyễn Hữu Cảnh • Nguyễn Hữu Kính", accent: "amber" },
+          { num: "II", label: "GIA PHẢ VẠN XUÂN & QUỐC TÍNH CHÚA BAN", main: "Nguyễn Hữu Thành • Nguyễn Phúc Lễ", accent: "stone" }
+        ],
+        counterQuote: "“Bậc đại tướng mang 5 danh xưng trong sử sách, mở đầu kỷ nguyên khai phá phương Nam.”",
+        counterSub: "Quê gốc Gia Miêu (Thanh Hóa) • Phát tích Vạn Xuân (Quảng Bình)"
+      },
+      {
+        primarySrc: "./truocmat.jpg",
+        altPng: "./truocmat.png",
+        altFallback: "./image-Photoroom (2).jpg",
+        side: "right",
+        originX: 735,
+        originY: 245,
+        elbowX: 865,
+        elbowY: 205,
+        endX: 975,
+        endY: 205,
+        ringRotate: 0,
+        stepNum: "02",
+        stepLabel: "Tước Vị",
+        kicker: "ĐẠI NAM THỰC LỤC & THÁI MIẾU",
+        title: "Tước Vị & Truy Phong",
+        items: [
+          { num: "I", label: "TƯỚC GỐC LÚC SINH TIỀN", main: "Chưởng Cơ Lễ Thành Hầu", accent: "amber" },
+          { num: "II", label: "THỜ TẠI THÁI MIẾU TRIỀU NGUYỄN (1804)", main: "Chưởng Cơ Lễ Tài Hầu", accent: "red" }
+        ],
+        counterQuote: "“Vị công thần bậc nhất thời chúa Nguyễn Phúc Chu, được vua Gia Long rước bài vị vào Thái Miếu.”",
+        counterSub: "Đúc tượng đồng & thờ phụng tại Biên Hòa, Sài Gòn, Châu Đốc"
+      },
+      {
+        primarySrc: "./bentrai.jpg",
+        altPng: "./bentrai.png",
+        altFallback: "./image-Photoroom (1).jpg",
+        side: "left",
+        originX: 675,
+        originY: 225,
+        elbowX: 560,
+        elbowY: 175,
+        endX: 465,
+        endY: 175,
+        ringRotate: -38,
+        stepNum: "03",
+        stepLabel: "Khảo Cứu",
+        kicker: "TÁC GIẢ TRẦN HOÀNG VŨ • NXB TP.HCM",
+        title: "Danh Tướng → Tôn Thần",
+        items: [
+          { num: "I", label: "PHẦN I • LÚC SINH TIỀN (1650 – 1700)", main: "Danh Tướng Mở Cõi Phương Nam", accent: "amber" },
+          { num: "II", label: "PHẦN II • TRONG TÂM THỨC NHÂN DÂN", main: "Thượng Đẳng Tôn Thần Nam Bộ", accent: "red" }
+        ],
+        counterQuote: "“Từ thanh bảo kiếm mở cõi năm 1698 đến ngôi vị Thượng Đẳng Thần bất tử trong lòng dân Việt.”",
+        counterSub: "Công trình khảo cứu của Trần Hoàng Vũ (NXB Tổng hợp TP.HCM)"
+      }
+    ];
+
+    const SLIDE4_SUBSTEPS = [
+      {
+        activeUnit: "phuoclong",
+        bannerTitle: "Xứ Đồng Nai → Huyện Phước Long • Dinh Trấn Biên",
+        bannerDesc: "Quản lý lưu vực sông Đồng Nai (vùng Biên Hòa ngày nay)"
+      },
+      {
+        activeUnit: "tanbinh",
+        bannerTitle: "Xứ Sài Gòn → Huyện Tân Bình • Dinh Phiên Trấn",
+        bannerDesc: "Quản lý lưu vực sông Sài Gòn – Bến Nghé (Khởi nguyên TP. Hồ Chí Minh)"
+      }
+    ];
+
+    function renderIntroPortal() {
+      return `
+        <div class="w-full py-2 relative">
+          <div class="flex items-center justify-between mb-6">
+            <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-stone-900/90 border border-amber-500/30">
+              <div class="vn-flag-badge w-6 h-4 rounded flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 30 20" fill="none">
+                  <polygon points="15,3.2 16.65,8.28 22,8.28 17.67,11.42 19.32,16.5 15,13.36 10.68,16.5 12.33,11.42 8,8.28 13.35,8.28" fill="#FFFF00"/>
+                </svg>
+              </div>
+              <span class="text-xs uppercase tracking-[0.22em] text-amber-300 font-semibold">Chuyên Đề Thuyết Trình Lịch Sử Nam Bộ</span>
+            </div>
+
+            <button onclick="toggleFullScreen()" class="px-4 py-1.5 rounded-full bg-stone-900/80 hover:bg-stone-800 border border-amber-500/30 text-amber-200 text-xs transition cursor-pointer">
+              ⛶ Toàn màn hình
+            </button>
+          </div>
+
+          <div class="grid grid-cols-12 gap-8 items-stretch">
+            <div class="col-span-12 lg:col-span-5 lacquer-panel rounded-3xl p-9 flex flex-col justify-between relative overflow-hidden">
+              <div class="space-y-4 relative z-10">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded bg-red-900/40 border border-red-500/40 text-red-300 text-xs uppercase tracking-widest font-semibold">
+                  ★ Khởi nguyên Sài Gòn – Gia Định (1698)
+                </div>
+
+                <div class="font-serif-display text-6xl lg:text-7xl font-extrabold text-amber-500/25 leading-none">
+                  1650 – 1700
+                </div>
+
+                <h1 class="font-serif-display text-5xl lg:text-6xl font-bold text-white leading-tight -mt-2">
+                  Lễ Thành Hầu <br/>
+                  <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-red-400">
+                    Nguyễn Hữu Cảnh
+                  </span>
+                </h1>
+
+                <p class="text-stone-300 text-base leading-relaxed pt-1">
+                  Từ vị danh tướng mở cõi xác lập chủ quyền vùng đất Đồng Nai – Gia Định đến bậc <strong>Thượng Đẳng Tôn Thần</strong> phương Nam.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-3 gap-3 my-6 relative z-10">
+                <div class="p-4 rounded-xl bg-stone-950/90 border border-stone-800 text-center">
+                  <div class="font-serif-display text-2xl font-bold text-amber-400">06</div>
+                  <div class="text-xs text-stone-400 mt-0.5">Chuyên mục</div>
+                </div>
+                <div class="p-4 rounded-xl bg-stone-950/90 border border-stone-800 text-center">
+                  <div class="font-serif-display text-2xl font-bold text-red-400">1698</div>
+                  <div class="text-xs text-stone-400 mt-0.5">Phủ Gia Định</div>
+                </div>
+                <div class="p-4 rounded-xl bg-stone-950/90 border border-stone-800 text-center">
+                  <div class="font-serif-display text-2xl font-bold text-amber-300">12</div>
+                  <div class="text-xs text-stone-400 mt-0.5">Thành viên</div>
+                </div>
+              </div>
+
+              <button onclick="startPresentationDeck()" class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-red-600 text-stone-950 font-extrabold text-sm uppercase tracking-wider flex items-center justify-between hover:brightness-110 transition shadow-lg shadow-amber-500/20 cursor-pointer">
+                <span>Bắt Đầu Thuyết Trình</span>
+                <span class="text-lg">→</span>
+              </button>
+            </div>
+
+            <div class="col-span-12 lg:col-span-7 lacquer-panel rounded-3xl p-8 flex flex-col justify-between">
+              <div class="flex items-center justify-between border-b border-amber-500/20 pb-4 mb-4">
+                <div>
+                  <span class="text-xs uppercase tracking-[0.2em] text-amber-400 font-semibold">Danh sách Phân công</span>
+                  <h2 class="font-serif-display text-3xl font-bold text-white mt-0.5">Thành Viên Tổ Thực Hiện</h2>
+                </div>
+                <span class="px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-2">
+                  ${EIGHT_POINT_STAR_SVG}
+                  <span>12 Thành Viên</span>
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 flex-1 items-center">
+                ${TEAM_MEMBERS.map((m, idx) => {
+                  const isSpecial = m.role.toUpperCase().includes("KHÔNG LÀM GÌ");
+                  const isLeader = m.role.includes("Tổ trưởng") || m.role.includes("Thuyết trình") || m.role.includes("Thiết Kế");
+                  return `
+                    <div class="stagger-item museum-card p-4 rounded-xl flex items-center gap-3.5 hover:border-amber-400/70 ${isLeader ? 'border-amber-400/45 bg-amber-500/[0.06]' : ''} ${isSpecial ? 'border-red-500/40 bg-red-950/20' : ''}" style="animation-delay: ${idx * 40}ms;">
+                      <div class="w-10 h-10 rounded-lg bg-stone-900 border ${isSpecial ? 'border-red-500/50' : 'border-amber-500/40'} flex items-center justify-center shrink-0">
+                        ${EIGHT_POINT_STAR_SVG}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="font-bold text-white text-base truncate">${m.name}</div>
+                        <div class="text-xs ${isSpecial ? 'text-red-400 font-bold tracking-wider' : isLeader ? 'text-amber-300 font-semibold' : 'text-stone-400'} truncate mt-0.5">${m.role}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // TRANG KẾT THÚC HÀO HÙNG & TRI ÂN CHUẨN MỰC (CẢM ƠN THẦY CÔ & CÁC BẠN)
+    // =========================================================================
+    function renderOutroCurtain() {
+      return `
+        <div class="w-full py-4 relative">
+          <!-- Hiệu ứng Hạt vàng lơ lửng hào hùng -->
+          <div class="gold-sparkle absolute left-[15%] top-16 w-3.5 h-3.5 rounded-full bg-amber-400/60 blur-[1px]"></div>
+          <div class="gold-sparkle absolute right-[18%] top-28 w-4 h-4 rounded-full bg-red-500/50 blur-[1px]" style="animation-delay: 1.2s"></div>
+          <div class="gold-sparkle absolute left-[28%] bottom-16 w-3 h-3 rounded-full bg-amber-300/70" style="animation-delay: 2.4s"></div>
+          <div class="gold-sparkle absolute right-[25%] bottom-20 w-3.5 h-3.5 rounded-full bg-amber-400/60" style="animation-delay: 1.8s"></div>
+
+          <div class="max-w-5xl mx-auto lacquer-panel rounded-3xl p-10 lg:p-12 text-center space-y-7 border-2 border-amber-400/60 relative overflow-hidden shadow-[0_0_80px_rgba(212,175,55,0.18)]">
+            <div class="absolute -right-20 -top-20 w-60 h-60 rounded-full bg-amber-500/15 blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -bottom-20 w-60 h-60 rounded-full bg-red-600/15 blur-3xl pointer-events-none"></div>
+
+            <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-gradient-to-r from-amber-500/20 via-red-600/20 to-amber-500/20 border border-amber-400/60 text-amber-300 text-xs uppercase tracking-[0.3em] font-extrabold shadow-lg">
+              ★ Tự Hào Hào Khí Phương Nam • 1698 – 2026 ★
+            </div>
+
+            <h1 class="font-serif-display text-4xl lg:text-6xl font-extrabold text-white leading-tight">
+              Cảm Ơn Thầy Cô <br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-red-400">
+                & Các Bạn Đã Lắng Nghe!
+              </span>
+            </h1>
+
+            <!-- 3 Trụ cột Tóm tắt hành trình lịch sử -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+              <div class="museum-card p-6 rounded-2xl border-t-4 border-t-amber-400 text-left space-y-2">
+                <div class="text-[11px] text-amber-400 uppercase font-bold tracking-widest">Chương 01 → 03</div>
+                <div class="font-serif-display text-2xl font-bold text-white">Danh Tướng Mở Cõi</div>
+                <p class="text-xs text-stone-300 leading-relaxed">
+                  Hành trình 3 thế hệ hổ tướng, mở đất Bình Thuận và kinh lược xứ Đông Phố.
+                </p>
+              </div>
+
+              <div class="museum-card p-6 rounded-2xl border-t-4 border-t-red-500 text-left space-y-2 pill-active">
+                <div class="text-[11px] text-red-300 uppercase font-bold tracking-widest">Mốc Son 1698</div>
+                <div class="font-serif-display text-2xl font-bold text-white">Khai Sinh Phủ Gia Định</div>
+                <p class="text-xs text-stone-100 leading-relaxed">
+                  Lập huyện Phước Long, Tân Bình, đặt dinh Trấn Biên, Phiên Trấn — Khởi nguyên TP.HCM.
+                </p>
+              </div>
+
+              <div class="museum-card p-6 rounded-2xl border-t-4 border-t-amber-400 text-left space-y-2">
+                <div class="text-[11px] text-amber-400 uppercase font-bold tracking-widest">Chương 05 → 06</div>
+                <div class="font-serif-display text-2xl font-bold text-white">Thượng Đẳng Tôn Thần</div>
+                <p class="text-xs text-stone-300 leading-relaxed">
+                  Khúc tráng ca sông Sầm Giang và di sản sống mãi trong tâm thức người dân Nam Bộ.
+                </p>
+              </div>
+            </div>
+
+            <p class="font-serif-display italic text-lg lg:text-xl text-amber-200/95 max-w-3xl mx-auto leading-relaxed pt-1">
+              “Từ cuộc kinh lược mùa xuân năm Mậu Dần <strong>1698</strong> của Lễ Thành hầu <strong>Nguyễn Hữu Cảnh</strong> đến diện mạo rực rỡ của <strong>TP. Hồ Chí Minh</strong> hôm nay.”
+            </p>
+
+            <div class="pt-2 flex flex-wrap items-center justify-center gap-5">
+              <button onclick="goToSlide(0)" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-red-600 text-stone-950 font-extrabold text-sm uppercase tracking-wider hover:scale-105 transition shadow-xl shadow-amber-500/25 cursor-pointer">
+                ↺ Xem Lại Từ Đầu Bài Thuyết Trình
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildSlide1SequentialRaySVG(item) {
+      return `
+        <svg class="w-full h-full overflow-visible" viewBox="0 0 1440 530" preserveAspectRatio="none" fill="none">
+          <line x1="${item.originX}" y1="${item.originY}" x2="${item.elbowX}" y2="${item.elbowY}"
+                stroke="#f59e0b" stroke-width="6" stroke-linecap="round"
+                class="seq-line-seg1 opacity-35" style="filter: blur(4px);" />
+          <line x1="${item.originX}" y1="${item.originY}" x2="${item.elbowX}" y2="${item.elbowY}"
+                stroke="#fde047" stroke-width="2.5" stroke-linecap="round"
+                class="seq-line-seg1" />
+
+          <line x1="${item.elbowX}" y1="${item.elbowY}" x2="${item.endX}" y2="${item.endY}"
+                stroke="#f59e0b" stroke-width="6" stroke-linecap="round"
+                class="seq-line-seg2 opacity-35" style="filter: blur(4px);" />
+          <line x1="${item.elbowX}" y1="${item.elbowY}" x2="${item.endX}" y2="${item.endY}"
+                stroke="#fde047" stroke-width="2.5" stroke-linecap="round"
+                class="seq-line-seg2" />
+
+          <circle cx="${item.originX}" cy="${item.originY}" r="18" stroke="#fbbf24" stroke-width="1.5" class="seq-ring-origin" />
+          <g class="seq-dot-origin">
+            <circle cx="${item.originX}" cy="${item.originY}" r="8" fill="rgba(212,175,55,0.35)" stroke="#fde047" stroke-width="2" />
+            <circle cx="${item.originX}" cy="${item.originY}" r="3.5" fill="#ffffff" />
+          </g>
+
+          <g class="seq-dot-elbow">
+            <circle cx="${item.elbowX}" cy="${item.elbowY}" r="4.5" fill="#fbbf24" stroke="#080706" stroke-width="1.5" />
+          </g>
+
+          <g class="seq-dot-end">
+            <circle cx="${item.endX}" cy="${item.endY}" r="6.5" fill="#dc2626" stroke="#fde047" stroke-width="2" />
+          </g>
+        </svg>
+      `;
+    }
+
+    function buildSlide1EditorialPlaque(item) {
+      return `
+        <div class="${item.side === 'left' ? 'plaque-pop-left border-r-[3px] border-r-amber-400' : 'plaque-pop-right border-l-[3px] border-l-amber-400'} editorial-plaque p-7 rounded-3xl w-full">
+          <div class="flex items-center justify-between gap-3 pb-3 border-b border-amber-500/20">
+            <span class="text-[11px] font-bold uppercase tracking-[0.15em] text-amber-400">
+              ${item.kicker}
+            </span>
+            <span class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 text-xs font-extrabold whitespace-nowrap shrink-0">
+              ${item.stepNum} / 03
+            </span>
+          </div>
+
+          <h2 class="font-serif-display text-3xl lg:text-[32px] font-bold text-white mt-3.5 mb-4 leading-tight">
+            ${item.title}
+          </h2>
+
+          <div class="space-y-4">
+            ${item.items.map((sub, i) => `
+              <div class="${i > 0 ? 'pt-4 border-t border-stone-800/90' : ''} flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-lg ${sub.accent === 'red' ? 'bg-red-500/20 border-red-400/50 text-red-300' : 'bg-amber-500/15 border-amber-400/50 text-amber-300'} border flex items-center justify-center font-serif-display font-bold text-sm shrink-0 mt-0.5">
+                  ${sub.num}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[11px] font-bold uppercase tracking-[0.12em] ${sub.accent === 'red' ? 'text-red-400' : sub.accent === 'amber' ? 'text-amber-400' : 'text-stone-400'}">
+                    ${sub.label}
+                  </div>
+                  <div class="font-serif-display text-xl lg:text-[22px] font-bold text-white mt-1 leading-snug break-words">
+                    ${sub.main}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildSlide1CounterBalance(item) {
+      return `
+        <div class="counter-balance-wing ${item.side === 'left' ? 'text-right items-end' : 'text-left items-start'} flex flex-col justify-center space-y-4 px-2">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/90 border border-amber-500/25 text-amber-300 text-xs uppercase tracking-[0.2em] font-semibold">
+            ★ Khởi Nguyên Sài Gòn – Gia Định
+          </div>
+
+          <div class="font-serif-display text-7xl lg:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-amber-300/35 to-amber-600/5 leading-none select-none">
+            1650–1700
+          </div>
+
+          <p class="font-serif-display italic text-xl lg:text-2xl text-stone-200/90 leading-relaxed max-w-[390px]">
+            ${item.counterQuote}
+          </p>
+
+          <div class="text-xs uppercase tracking-[0.15em] text-amber-400/85 font-semibold pt-1">
+            ${item.counterSub}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateSlide1OrbitSmoothly(nextSub) {
+      const stageRoot = document.getElementById('s1-clean-stage');
+      if (!stageRoot) {
+        renderView(false);
+        return;
+      }
+
+      const item = STATUE_ORBIT_ANGLES[nextSub];
+
+      STATUE_ORBIT_ANGLES.forEach((_, idx) => {
+        const layerEl = document.getElementById(`statue-layer-${idx}`);
+        if (!layerEl) return;
+        layerEl.classList.remove('is-active', 'is-orbit-left', 'is-orbit-right');
+
+        if (idx === nextSub) {
+          layerEl.classList.add('is-active');
+        } else if (idx < nextSub) {
+          layerEl.classList.add('is-orbit-left');
+        } else {
+          layerEl.classList.add('is-orbit-right');
+        }
+      });
+
+      const floorRing = document.getElementById('s1-floor-ring');
+      if (floorRing) {
+        floorRing.style.transform = `rotateX(76deg) rotateZ(${item.ringRotate}deg)`;
+      }
+
+      document.querySelectorAll('.s1-step-btn').forEach((btn, idx) => {
+        btn.classList.toggle('pill-active', idx === nextSub);
+      });
+
+      const rayBox = document.getElementById('s1-ray-box');
+      const leftBox = document.getElementById('s1-left-box');
+      const rightBox = document.getElementById('s1-right-box');
+
+      if (rayBox) rayBox.innerHTML = buildSlide1SequentialRaySVG(item);
+      if (leftBox) {
+        leftBox.innerHTML = item.side === 'left' ? buildSlide1EditorialPlaque(item) : buildSlide1CounterBalance(item);
+      }
+      if (rightBox) {
+        rightBox.innerHTML = item.side === 'right' ? buildSlide1EditorialPlaque(item) : buildSlide1CounterBalance(item);
+      }
+    }
+
+    const slides = [
+      {
+        chapter: "01 • Danh Tướng Lễ Thành Hầu Nguyễn Hữu Cảnh (1650–1700)",
+        subStepsCount: 3,
+        speakerNotes: "Góc 1 (5 Danh xưng - tượng xoay phải): Gia phả tại Vạn Xuân (Quảng Bình) ghi tên ông là Nguyễn Hữu Thành, được ban quốc tính là Nguyễn Phúc Lễ (Nguyễn Lễ), phổ biến nhất là Nguyễn Hữu Cảnh (đọc trại thành Kính do kiêng húy). Góc 2 (Tước vị - tượng nhìn thẳng): Tước gốc là Lễ Thành Hầu; năm 1804 vua Gia Long truy phong tại Thái miếu là Chưởng cơ Lễ Tài Hầu. Góc 3 (Khảo cứu Trần Hoàng Vũ - tượng xoay trái): Sách chia làm 2 phần gồm Hành trạng lúc sinh tiền & Tín ngưỡng thờ phụng ông khắp Nam Bộ.",
+        render: (subStep = 0) => {
+          const item = STATUE_ORBIT_ANGLES[subStep];
+          return `
+            <div id="s1-clean-stage" class="relative w-full h-[585px] flex flex-col justify-between -mt-3">
+              
+              <div class="relative z-30 flex items-center justify-between border-b border-amber-500/20 pb-2.5">
+                <div>
+                  <div class="text-[11px] uppercase tracking-[0.25em] text-amber-400 font-bold">
+                    Danh Tướng Mở Cõi Thời Chúa Nguyễn Phúc Chu
+                  </div>
+                  <h1 class="font-serif-display text-3xl lg:text-4xl font-bold text-white mt-0.5">
+                    Lễ Thành Hầu <span class="text-amber-400">Nguyễn Hữu Cảnh</span>
+                  </h1>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-stone-950/90 p-1.5 rounded-2xl border border-amber-500/30">
+                  ${STATUE_ORBIT_ANGLES.map((st, idx) => `
+                    <button onclick="jumpToSubStep(${idx})"
+                            class="s1-step-btn ${subStep === idx ? 'pill-active' : ''} museum-card px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer">
+                      <span class="text-xs font-extrabold text-amber-400">${st.stepNum}</span>
+                      <span class="text-xs font-bold text-white whitespace-nowrap">${st.stepLabel}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="relative h-[530px] w-full flex items-center justify-center">
+                
+                <div class="statue-3d-rig relative w-[480px] h-full flex items-center justify-center z-20">
+                  <div class="pointer-events-none absolute top-[46%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.24)_0%,transparent_70%)]"></div>
+                  <div class="pointer-events-none absolute top-[44%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[285px] h-[285px] rounded-full border border-amber-400/20"></div>
+                  <div class="pointer-events-none absolute top-[44%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[245px] h-[245px] rounded-full border border-dashed border-amber-400/25"></div>
+
+                  ${STATUE_ORBIT_ANGLES.map((st, idx) => {
+                    let stateClass = 'is-orbit-right';
+                    if (idx === subStep) stateClass = 'is-active';
+                    else if (idx < subStep) stateClass = 'is-orbit-left';
+                    return `
+                      <div id="statue-layer-${idx}" class="statue-layer ${stateClass}">
+                        <img src="${st.primarySrc}"
+                             data-png="${st.altPng}"
+                             data-fallback="${st.altFallback}"
+                             onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.dataset.png;}else if(!this.dataset.t2){this.dataset.t2='1';this.src=this.dataset.fallback;}"
+                             alt="Tượng Lễ Thành Hầu Nguyễn Hữu Cảnh"
+                             class="statue-hero-img select-none" />
+                      </div>
+                    `;
+                  }).join('')}
+
+                  <div class="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 w-[420px] h-[420px] flex items-center justify-center -z-10">
+                    <svg id="s1-floor-ring"
+                         class="w-full h-full text-amber-400/50 transition-transform duration-700 ease-out"
+                         style="transform: rotateX(76deg) rotateZ(${item.ringRotate}deg);"
+                         viewBox="0 0 220 220" fill="none">
+                      <circle cx="110" cy="110" r="102" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 4"/>
+                      <circle cx="110" cy="110" r="78" stroke="currentColor" stroke-width="1"/>
+                      <circle cx="110" cy="110" r="56" stroke="currentColor" stroke-width="2" stroke-dasharray="14 6"/>
+                      <polygon points="110,2 117,16 103,16" fill="#fbbf24"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div id="s1-ray-box" class="pointer-events-none absolute inset-0 z-30">
+                  ${buildSlide1SequentialRaySVG(item)}
+                </div>
+
+                <div id="s1-left-box" class="absolute left-0 top-[46%] -translate-y-1/2 w-[32.3%] min-w-[420px] max-w-[475px] z-30">
+                  ${item.side === 'left' ? buildSlide1EditorialPlaque(item) : buildSlide1CounterBalance(item)}
+                </div>
+
+                <div id="s1-right-box" class="absolute right-0 top-[46%] -translate-y-1/2 w-[32.3%] min-w-[420px] max-w-[475px] z-30">
+                  ${item.side === 'right' ? buildSlide1EditorialPlaque(item) : buildSlide1CounterBalance(item)}
+                </div>
+
+              </div>
+
+            </div>
+          `;
+        }
+      },
+
+      {
+        chapter: "02 • Gia Thế 3 Đời Danh Tướng & Võ Phái Bạch Hổ",
+        subStepsCount: 1,
+        speakerNotes: "Gốc làng Gia Miêu (Hà Trung, Thanh Hóa), phát tích tại Vạn Xuân (Quảng Bình). Đời 1 là ông nội Triều Văn hầu Nguyễn Triều Văn theo chúa Nguyễn Hoàng vào Nam năm 1609 (đời Lê Kính Tông). Đời 2 là thân phụ Chiêu Vũ hầu Nguyễn Hữu Dật ('Gia Cát nước Nam'). Đời 3 là Lễ Thành hầu Nguyễn Hữu Cảnh, 23 tuổi tòng chinh cùng 3 anh em Nguyễn Hữu Hào, Nguyễn Hữu Trung, Nguyễn Hữu Chắc và khai sáng môn phái Bạch Hổ Sơn Quân Phái.",
+        render: () => `
+          <div class="w-full space-y-8">
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-amber-500/25 pb-5">
+              <div>
+                <span class="inline-block px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm uppercase tracking-widest font-bold">
+                  Gia Miêu (Thanh Hóa) • Vạn Xuân (Quảng Bình)
+                </span>
+                <h2 class="font-serif-display text-5xl lg:text-6xl font-bold text-white mt-3">
+                  Truyền Thống <span class="text-amber-400">3 Thế Hệ Danh Tướng</span>
+                </h2>
+              </div>
+              <div class="font-serif-display text-5xl lg:text-6xl font-bold text-amber-400/35 whitespace-nowrap">
+                1609 → 1700
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-9 items-stretch">
+              <div class="col-span-12 lg:col-span-7 flex flex-col justify-between space-y-5">
+                
+                <div class="stagger-item museum-card p-7 rounded-3xl border-l-4 border-l-stone-400 flex items-center justify-between gap-6" style="animation-delay: 50ms">
+                  <div class="flex items-center gap-6">
+                    <div class="min-w-[125px] py-3.5 px-4 rounded-2xl bg-stone-900 border border-stone-600 text-center shrink-0">
+                      <div class="text-xs text-stone-400 uppercase font-bold">Ông Nội</div>
+                      <div class="text-xl font-extrabold text-white mt-1">Năm 1609</div>
+                    </div>
+                    <div>
+                      <div class="font-serif-display text-3xl lg:text-4xl font-bold text-white">Triều Văn Hầu Nguyễn Triều Văn</div>
+                      <div class="text-lg text-stone-300 mt-1.5">Theo chúa Nguyễn Hoàng vào Nam mở đất</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="stagger-item museum-card p-7 rounded-3xl border-l-4 border-l-amber-400 flex items-center justify-between gap-6" style="animation-delay: 130ms">
+                  <div class="flex items-center gap-6">
+                    <div class="min-w-[125px] py-3.5 px-4 rounded-2xl bg-amber-500/15 border border-amber-400/50 text-center shrink-0">
+                      <div class="text-xs text-amber-300 uppercase font-bold">Thân Phụ</div>
+                      <div class="text-xl font-extrabold text-amber-400 mt-1">Đời Thứ II</div>
+                    </div>
+                    <div>
+                      <div class="font-serif-display text-3xl lg:text-4xl font-bold text-white">Chiêu Vũ Hầu Nguyễn Hữu Dật</div>
+                      <div class="text-lg text-amber-300 font-semibold mt-1.5">Mệnh danh “Gia Cát Nước Nam”</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="stagger-item pill-active museum-card p-7 rounded-3xl border-l-4 border-l-red-500" style="animation-delay: 210ms">
+                  <div class="flex items-center gap-6">
+                    <div class="min-w-[125px] py-3.5 px-4 rounded-2xl bg-red-600/25 border border-red-400 text-center shrink-0">
+                      <div class="text-xs text-red-200 uppercase font-bold">Tòng Chinh</div>
+                      <div class="text-xl font-extrabold text-white mt-1">23 Tuổi</div>
+                    </div>
+                    <div>
+                      <div class="font-serif-display text-3xl lg:text-4xl font-bold text-white">Lễ Thành Hầu Nguyễn Hữu Cảnh</div>
+                      <div class="text-lg text-red-200 font-medium mt-1.5">Cùng 3 anh em: <strong>Hữu Hào • Hữu Trung • Hữu Chắc</strong></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="col-span-12 lg:col-span-5">
+                <div class="lacquer-panel h-full rounded-3xl p-9 border border-amber-400/40 flex flex-col justify-between items-center text-center relative overflow-hidden">
+                  <div class="text-sm uppercase tracking-[0.24em] text-amber-400 font-bold">
+                    Di Sản Võ Học Cổ Truyền Dân Tộc
+                  </div>
+
+                  <div class="my-3 w-56 h-56 rounded-full border-2 border-amber-400/60 bg-stone-950 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(212,175,55,0.25)]">
+                    <svg class="w-32 h-32 text-amber-400" viewBox="0 0 100 100" fill="none">
+                      <path d="M18 82 L82 18 M70 18 L82 18 L82 30" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M82 82 L18 18 M30 18 L18 18 L18 30" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M50 22 L74 32 V52 C74 68 50 80 50 80 C50 80 26 68 26 52 V32 L50 22 Z" fill="#1c1917" stroke="#f59e0b" stroke-width="2.5"/>
+                      <polygon points="50,34 54,44 64,44 56,50 59,60 50,54 41,60 44,50 36,44 46,44" fill="#ef4444" stroke="#fde047" stroke-width="1"/>
+                    </svg>
+                    <span class="mt-2 px-4 py-1 rounded-full bg-red-600/30 border border-red-400/50 text-xs text-amber-200 font-bold">
+                      Sư Tổ Khai Sáng
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 class="font-serif-display text-4xl font-bold text-amber-300">Bạch Hổ Sơn Quân Phái</h3>
+                    <p class="text-lg text-stone-300 mt-2">
+                      Kết tinh binh pháp & võ trận Đàng Trong
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      {
+        chapter: "03 • Kế Nghiệp Cha & Mở Đất Bình Thuận (1681–1692)",
+        subStepsCount: 1,
+        speakerNotes: "Năm 1681, thân phụ Nguyễn Hữu Dật qua đời, ông tiếp nhận trọng trách. Năm 1692, giữ chức Thống binh dẹp yên biên ải, lập ra Trấn Thuận Thành (mở đất Bình Thuận ngày nay) và kinh lược xứ Đông Phố xuất sắc, tạo bàn đạp vững chắc trước khi lập Phủ Gia Định năm 1698.",
+        render: () => `
+          <div class="w-full grid grid-cols-12 gap-10 items-center">
+            <div class="col-span-12 lg:col-span-6 space-y-6">
+              <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm uppercase tracking-widest font-bold">
+                Thống Binh Xứ Đàng Trong • 1681 – 1692
+              </div>
+
+              <h2 class="font-serif-display text-5xl lg:text-6xl font-bold text-white leading-tight">
+                Mở Đất Bình Thuận <br/>
+                <span class="text-amber-400">Lập Trấn Thuận Thành</span>
+              </h2>
+
+              <div class="space-y-4 pt-2">
+                <div class="stagger-item museum-card p-6 lg:p-7 rounded-3xl flex items-center gap-6" style="animation-delay: 60ms">
+                  <span class="font-serif-display text-5xl font-bold text-amber-400 w-36 shrink-0">1681</span>
+                  <div>
+                    <div class="font-serif-display text-3xl font-bold text-white">Kế Nghiệp Thân Phụ</div>
+                    <div class="text-lg text-stone-300 mt-1">Tiếp nối Chiêu Vũ hầu Nguyễn Hữu Dật</div>
+                  </div>
+                </div>
+
+                <div class="stagger-item pill-active museum-card p-6 lg:p-7 rounded-3xl flex items-center gap-6" style="animation-delay: 150ms">
+                  <span class="font-serif-display text-5xl font-bold text-red-400 w-36 shrink-0">1692</span>
+                  <div>
+                    <div class="font-serif-display text-3xl font-bold text-white">Lập Trấn Thuận Thành</div>
+                    <div class="text-lg text-amber-200 font-medium mt-1">Thống binh mở đất Bình Thuận</div>
+                  </div>
+                </div>
+
+                <div class="stagger-item museum-card p-6 lg:p-7 rounded-3xl flex items-center gap-6" style="animation-delay: 240ms">
+                  <span class="font-serif-display text-3xl font-bold text-amber-300 w-36 shrink-0">Đông Phố</span>
+                  <div>
+                    <div class="font-serif-display text-3xl font-bold text-white">Kinh Lược Đông Phố</div>
+                    <div class="text-lg text-stone-300 mt-1">Tiền đề lập Phủ Gia Định năm 1698</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-6">
+              <div class="lacquer-panel h-[520px] w-full rounded-3xl p-8 border border-amber-500/40 relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm uppercase tracking-widest text-amber-300 bg-stone-900 px-4 py-2 rounded-xl border border-amber-500/30 font-bold">
+                    Sa Bàn Hành Quân Nam Tiến
+                  </span>
+                  <span class="text-lg text-amber-400 font-bold">1681 → 1692</span>
+                </div>
+
+                <div class="relative flex-1 my-2 flex items-center justify-center">
+                  <svg class="w-full h-full max-h-[380px]" viewBox="0 0 420 260" fill="none">
+                    <path d="M90 20 Q160 65 195 115 T220 200 L145 240" stroke="rgba(212,175,55,0.22)" stroke-width="28" stroke-linecap="round" fill="none"/>
+                    <path d="M90 20 Q160 65 195 115 T220 200 L145 240" stroke="rgba(212,175,55,0.5)" stroke-width="1.5" fill="none"/>
+                    <path class="march-route" d="M95 28 Q170 72 200 135 T155 232" stroke="#fbbf24" stroke-width="3.5" fill="none"/>
+
+                    <circle cx="95" cy="28" r="7" fill="#fbbf24"/>
+                    <text x="114" y="33" fill="#ffffff" font-size="15" font-weight="bold">Phú Xuân (1681)</text>
+
+                    <circle cx="205" cy="145" r="10" fill="#dc2626" stroke="#fde047" stroke-width="2.5"/>
+                    <rect x="225" y="122" width="185" height="48" rx="10" fill="rgba(20,16,13,0.96)" stroke="#fbbf24" stroke-width="1.5"/>
+                    <text x="236" y="143" fill="#fde047" font-size="14" font-weight="bold">1692: Trấn Thuận Thành</text>
+                    <text x="236" y="160" fill="#e7e5e4" font-size="12">Mở đất Bình Thuận</text>
+
+                    <circle cx="155" cy="232" r="8" fill="#fbbf24"/>
+                    <text x="174" y="236" fill="#fde68a" font-size="15" font-weight="bold">Xứ Đông Phố (Đồng Nai)</text>
+                  </svg>
+                </div>
+
+                <div class="text-center border-t border-stone-800 pt-4 text-lg text-stone-200 font-medium">
+                  🧭 Tuyến mở cõi: <strong class="text-amber-300">Phú Xuân → Bình Thuận (1692) → Đông Phố</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      {
+        chapter: "04 • Mốc Son 1698: Lập Phủ Gia Định (Khởi nguyên Sài Gòn - TP.HCM)",
+        subStepsCount: 2,
+        speakerNotes: "Tháng 2 âm lịch năm 1698, chúa Nguyễn Phúc Chu cử ông làm Thống suất kinh lược Đồng Nai. Ông lập Phủ Gia Định: lấy xứ Đồng Nai làm huyện Phước Long (dựng dinh Trấn Biên), lấy xứ Sài Gòn làm huyện Tân Bình (dựng dinh Phiên Trấn). Trên mảnh bản đồ cổ bên trái, mọi người có thể nhìn thấy rõ Sông Bến Nghé, Chợ Bến Thành, Thành Bát Quái, Cầu Thị Nghè và Tổng Bình Trị.",
+        render: (subStep = 0) => {
+          const st = SLIDE4_SUBSTEPS[subStep];
+          return `
+            <div class="w-full grid grid-cols-12 gap-10 items-center">
+              
+              <div class="col-span-12 lg:col-span-5">
+                <div class="lacquer-panel rounded-3xl p-4 border-2 border-amber-500/45 shadow-2xl space-y-4">
+                  
+                  <div class="relative h-[425px] w-full rounded-2xl overflow-hidden bg-stone-900 border border-amber-500/30">
+                    <img src="./ban-do-gia-dinh.jpg" 
+                         onerror="if(this.src.includes('ban-do-gia-dinh.jpg')){this.src='./image_7734e4.jpg'}else if(this.src.includes('image_7734e4.jpg')){this.src='https://upload.wikimedia.org/wikipedia/commons/c/c8/Gia_Dinh_1815_map.jpg'}"
+                         alt="Bản đồ cổ Gia Định - Sông Bến Nghé" 
+                         class="w-full h-full object-cover contrast-110 hover:scale-105 transition-transform duration-700" />
+                  </div>
+
+                  <div class="px-2 py-1 flex items-center justify-between">
+                    <div>
+                      <div class="text-xs uppercase tracking-widest text-amber-400 font-bold">Tư liệu Bản đồ cổ Gia Định</div>
+                      <div class="font-serif-display text-2xl font-bold text-white">Sông Bến Nghé • Chợ Bến Thành • Thị Nghè</div>
+                    </div>
+                    <span class="px-4 py-1.5 rounded-xl bg-red-600/25 border border-red-500/40 text-red-300 text-sm font-bold shrink-0">
+                      Năm 1698
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="col-span-12 lg:col-span-7 space-y-5">
+                <div class="flex items-center justify-between">
+                  <span class="px-4 py-1.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-sm uppercase tracking-widest font-bold">
+                    Mùa Xuân Năm Mậu Dần • Tháng 2 ÂL (1698)
+                  </span>
+                  <span class="font-serif-display text-6xl lg:text-7xl font-extrabold text-amber-400">1698</span>
+                </div>
+
+                <h2 class="font-serif-display text-5xl lg:text-6xl font-bold text-white">
+                  Khai Sinh <span class="text-amber-400">Phủ Gia Định</span>
+                </h2>
+
+                <div class="grid grid-cols-2 gap-5">
+                  <div onclick="jumpToSubStep(0)" class="${st.activeUnit === 'phuoclong' ? 'pill-active' : ''} museum-card p-7 rounded-3xl cursor-pointer">
+                    <div class="text-sm text-amber-400 uppercase font-bold tracking-wider">Xứ Đồng Nai (Biên Hòa)</div>
+                    <div class="font-serif-display text-3xl lg:text-4xl font-bold text-white mt-2">Huyện Phước Long</div>
+                    <div class="mt-4 inline-block px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 text-base font-bold">
+                      🏛️ Dinh Trấn Biên
+                    </div>
+                  </div>
+
+                  <div onclick="jumpToSubStep(1)" class="${st.activeUnit === 'tanbinh' ? 'pill-active' : ''} museum-card p-7 rounded-3xl cursor-pointer">
+                    <div class="text-sm text-red-400 uppercase font-bold tracking-wider">Xứ Sài Gòn (TP.HCM)</div>
+                    <div class="font-serif-display text-3xl lg:text-4xl font-bold text-white mt-2">Huyện Tân Bình</div>
+                    <div class="mt-4 inline-block px-4 py-2 rounded-xl bg-red-500/20 text-red-300 text-base font-bold">
+                      🏛️ Dinh Phiên Trấn
+                    </div>
+                  </div>
+                </div>
+
+                <div class="lacquer-panel p-6 rounded-2xl border-l-4 border-l-amber-400">
+                  <div class="text-2xl font-bold text-amber-300">${st.bannerTitle}</div>
+                  <div class="text-lg text-stone-200 mt-1">${st.bannerDesc}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 text-center">
+                  <div class="museum-card p-4 rounded-2xl">
+                    <div class="text-amber-400 font-extrabold text-xl">📋 Lập Sổ Đinh</div>
+                    <div class="text-sm text-stone-300 mt-1">Quản lý nhân khẩu</div>
+                  </div>
+                  <div class="museum-card p-4 rounded-2xl">
+                    <div class="text-amber-400 font-extrabold text-xl">🌾 Lập Sổ Điền</div>
+                    <div class="text-sm text-stone-300 mt-1">Chủ quyền ruộng đất</div>
+                  </div>
+                  <div class="museum-card p-4 rounded-2xl">
+                    <div class="text-amber-400 font-extrabold text-xl">⛵ Chiêu Dân</div>
+                    <div class="text-sm text-stone-300 mt-1">40.000+ hộ an cư</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          `;
+        }
+      },
+
+      {
+        chapter: "05 • Bình Định Tây Nam & Khúc Tráng Ca Năm 1700",
+        subStepsCount: 1,
+        speakerNotes: "Năm 1699–1700, ông bình định Chân Lạp, đánh tan quân Nặc Thu. Tháng 4 âm lịch năm Canh Thìn (1700), ông nhiễm dịch bệnh tê hai chân. Ngày mồng 5/5 Tết Đoan Ngọ, sợ lòng quân dao động, ông gượng dậy mở tiệc uống rượu, thổ ra cục máu nhưng vội lấy vạt tay áo che đi. Ngày 16/5 âm lịch, ông tạ thế tại Sầm Giang (Rạch Gầm – Mỹ Tho), hưởng dương 51 tuổi.",
+        render: () => `
+          <div class="w-full grid grid-cols-12 gap-10 items-center">
+            <div class="col-span-12 lg:col-span-6 space-y-6">
+              <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-sm uppercase tracking-widest font-bold">
+                Năm Canh Thìn 1700 • Hưởng dương 51 tuổi
+              </div>
+
+              <h2 class="font-serif-display text-5xl lg:text-6xl font-bold text-white leading-tight">
+                Vạt Áo Che Máu <br/>
+                <span class="text-red-400">Tết Đoan Ngọ</span>
+              </h2>
+
+              <div class="grid grid-cols-2 gap-4 pt-2">
+                <div class="stagger-item museum-card p-7 rounded-3xl border-l-4 border-l-amber-400" style="animation-delay: 50ms">
+                  <div class="text-sm text-amber-400 font-bold uppercase tracking-wider">1699 – 1700</div>
+                  <div class="font-serif-display text-3xl font-bold text-white mt-2">Yên Biên Giới Tây Nam</div>
+                </div>
+
+                <div class="stagger-item museum-card p-7 rounded-3xl border-l-4 border-l-stone-400" style="animation-delay: 130ms">
+                  <div class="text-sm text-stone-300 font-bold uppercase tracking-wider">Tháng 4 ÂL (1700)</div>
+                  <div class="font-serif-display text-3xl font-bold text-white mt-2">Lâm Trọng Bệnh Nơi Quân Thứ</div>
+                </div>
+
+                <div class="stagger-item pill-active museum-card p-7 rounded-3xl border-l-4 border-l-red-500" style="animation-delay: 210ms">
+                  <div class="text-sm text-red-300 font-bold uppercase tracking-wider">Mồng 5/5 Đoan Ngọ</div>
+                  <div class="font-serif-display text-3xl font-bold text-white mt-2">Vạt Áo Che Máu Yên Lòng Quân</div>
+                </div>
+
+                <div class="stagger-item museum-card p-7 rounded-3xl border-l-4 border-l-amber-600" style="animation-delay: 290ms">
+                  <div class="text-sm text-amber-300 font-bold uppercase tracking-wider">Ngày 16/5 ÂL (1700)</div>
+                  <div class="font-serif-display text-3xl font-bold text-white mt-2">Tạ Thế Tại Sầm Giang</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-6">
+              <div class="lacquer-panel h-[510px] w-full rounded-3xl p-9 border border-red-500/40 relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -top-10 right-10 w-56 h-56 rounded-full bg-red-600/25 blur-2xl"></div>
+
+                <span class="relative z-10 inline-block w-fit px-4 py-1.5 rounded-xl bg-red-950/90 border border-red-500/40 text-red-300 text-sm uppercase tracking-widest font-bold">
+                  Khí Phách Đại Tướng Trên Sông Tiền
+                </span>
+
+                <blockquote class="relative z-10 font-serif-display italic text-3xl lg:text-[34px] text-white leading-relaxed bg-stone-950/85 p-8 rounded-3xl border border-red-500/30">
+                  “Mồng 5 tháng 5 Tết Đoan Ngọ, ông gượng dậy mở tiệc uống rượu yên lòng ba quân, thổ ra máu tươi nhưng vội lấy vạt áo che khuất...”
+                </blockquote>
+
+                <div class="relative z-10">
+                  <svg class="w-full h-24 river-wave" viewBox="0 0 400 80" fill="none">
+                    <path d="M90 48 L140 65 L250 65 L295 43 L265 46 L120 46 Z" fill="#1c1917" stroke="#f59e0b" stroke-width="1.5"/>
+                    <path d="M185 12 L185 46" stroke="#f59e0b" stroke-width="2"/>
+                    <path d="M185 14 L235 26 L185 38 Z" fill="#b91c1c"/>
+                    <path d="M0 68 Q50 58 100 68 T200 68 T300 68 T400 68" stroke="rgba(212,175,55,0.5)" stroke-width="1.5" fill="none"/>
+                  </svg>
+                  <div class="flex items-center justify-between text-lg text-stone-200 border-t border-stone-800 pt-3 font-medium">
+                    <span>📍 <strong>Sầm Giang</strong> (Rạch Gầm – Mỹ Tho)</span>
+                    <span class="text-red-400 font-bold">16/5 Âm lịch (1700)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      {
+        chapter: "06 • Tổng Kết: Từ Danh Tướng Đến Tôn Thần Nam Bộ",
+        subStepsCount: 1,
+        speakerNotes: "Tổng kết 2 giá trị vĩnh cửu của Lễ Thành hầu Nguyễn Hữu Cảnh: Lúc sinh tiền ông là vị tướng mở cõi khai sinh Phủ Gia Định (1698) – tiền thân của Sài Gòn – TP.HCM. Sau khi mất, ông được thờ tại Thái miếu (1804) và hóa thân thành bậc Thượng Đẳng Tôn Thần trong hàng chục ngôi đền miếu khắp miền Nam.",
+        render: () => `
+          <div class="w-full space-y-8">
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-amber-500/25 pb-5">
+              <div>
+                <span class="inline-block px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm uppercase tracking-widest font-bold">
+                  Tổng kết Chuyên đề Lịch sử Nam Bộ
+                </span>
+                <h2 class="font-serif-display text-5xl lg:text-6xl font-bold text-white mt-3">
+                  Từ <span class="text-amber-400">Danh Tướng Mở Cõi</span> Đến <span class="text-red-400">Bậc Tôn Thần</span>
+                </h2>
+              </div>
+              <span class="font-serif-display text-5xl lg:text-6xl font-bold text-amber-400/35 whitespace-nowrap">
+                1698 → Hơn 325 Năm
+              </span>
+            </div>
+
+            <div class="grid grid-cols-12 gap-8 items-stretch">
+              <div class="col-span-12 lg:col-span-4 stagger-item lacquer-panel p-9 rounded-3xl border-t-4 border-t-amber-400 flex flex-col justify-between" style="animation-delay: 60ms">
+                <div class="space-y-4">
+                  <span class="inline-block px-4 py-1.5 rounded-lg bg-amber-500/15 text-amber-300 text-sm font-bold uppercase tracking-wider">
+                    01 • Lúc Sinh Tiền
+                  </span>
+                  <h3 class="font-serif-display text-4xl font-bold text-white leading-tight">Khai Sinh Đô Thị Sài Gòn</h3>
+                  <p class="text-xl text-stone-300 leading-relaxed pt-2">
+                    Xác lập chủ quyền Đại Việt và lập <strong>Phủ Gia Định (1698)</strong> – nền móng của <strong>TP. Hồ Chí Minh</strong>.
+                  </p>
+                </div>
+                <div class="pt-6 border-t border-stone-800 text-lg text-amber-300 font-bold">
+                  🏛️ Dinh Trấn Biên & Dinh Phiên Trấn
+                </div>
+              </div>
+
+              <div class="col-span-12 lg:col-span-4 lacquer-panel p-9 rounded-3xl border border-amber-400/50 flex flex-col justify-between items-center text-center">
+                <div class="text-sm uppercase tracking-[0.22em] text-amber-400 font-bold">
+                  Biểu Tượng Vĩnh Cửu
+                </div>
+
+                <svg class="w-60 h-52 my-3" viewBox="0 0 220 180" fill="none">
+                  <circle cx="110" cy="95" r="68" fill="rgba(212,175,55,0.1)" stroke="rgba(212,175,55,0.35)" stroke-dasharray="4 4"/>
+                  <rect x="65" y="45" width="16" height="85" fill="rgba(255,255,255,0.08)" stroke="rgba(212,175,55,0.3)"/>
+                  <path d="M98 30 L114 38 L114 130 L98 130 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(212,175,55,0.4)"/>
+                  <rect x="128" y="55" width="18" height="75" fill="rgba(255,255,255,0.08)" stroke="rgba(212,175,55,0.3)"/>
+                  <path d="M30 115 Q110 75 190 115 L175 122 L45 122 Z" fill="#991b1b" stroke="#fbbf24" stroke-width="1.8"/>
+                  <rect x="55" y="122" width="110" height="36" fill="#1c1917" stroke="#fbbf24" stroke-width="1.5"/>
+                  <rect x="96" y="132" width="28" height="26" fill="#7f1d1d" stroke="#fde047"/>
+                </svg>
+
+                <div>
+                  <div class="font-serif-display text-4xl font-bold text-white">1698 – Nay</div>
+                  <div class="text-lg text-amber-300 mt-1 font-medium">Di sản hơn 3 thế kỷ</div>
+                </div>
+              </div>
+
+              <div class="col-span-12 lg:col-span-4 stagger-item pill-active lacquer-panel p-9 rounded-3xl border-t-4 border-t-red-500 flex flex-col justify-between" style="animation-delay: 160ms">
+                <div class="space-y-4">
+                  <span class="inline-block px-4 py-1.5 rounded-lg bg-red-500/20 text-red-300 text-sm font-bold uppercase tracking-wider">
+                    02 • Trong Tâm Thức
+                  </span>
+                  <h3 class="font-serif-display text-4xl font-bold text-white leading-tight">Thượng Đẳng Tôn Thần</h3>
+                  <p class="text-xl text-stone-200 leading-relaxed pt-2">
+                    Thờ tại <strong>Thái miếu (1804)</strong> và hệ thống đền miếu khắp Nam Bộ suốt hơn 300 năm.
+                  </p>
+                </div>
+                <div class="pt-6 border-t border-amber-500/20 text-lg text-amber-300 font-bold">
+                  🙏 Tín ngưỡng thờ Lễ Thành Hầu
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    function initDots() {
+      const dotsContainer = document.getElementById('slide-dots');
+      dotsContainer.innerHTML = slides.map((s, i) => `
+        <button 
+          onclick="goToSlide(${i})" 
+          title="${s.chapter}" 
+          class="nav-dot cursor-pointer ${i === currentSlide ? 'active' : ''}">
+        </button>
+      `).join('');
+    }
+
+    function updateDotsActiveState() {
+      const dotButtons = document.querySelectorAll('#slide-dots .nav-dot');
+      dotButtons.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === currentSlide);
+      });
+    }
+
+    function renderView(useMorph = true) {
+      const stage = document.getElementById('slide-stage');
+      const topHud = document.getElementById('top-hud');
+      const bottomHud = document.getElementById('bottom-hud');
+      const counter = document.getElementById('slide-counter');
+      const chapter = document.getElementById('slide-chapter');
+      const progress = document.getElementById('progress-bar');
+      const notesContent = document.getElementById('speaker-notes-content');
+
+      if (viewMode === 'deck') {
+        topHud.classList.remove('hud-hidden-top');
+        bottomHud.classList.remove('hud-hidden-bottom');
+        updateDotsActiveState();
+        counter.textContent = `0${currentSlide + 1} / 0${slides.length}`;
+        chapter.textContent = slides[currentSlide].chapter;
+        progress.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+        notesContent.textContent = slides[currentSlide].speakerNotes;
+      } else {
+        topHud.classList.add('hud-hidden-top');
+        bottomHud.classList.add('hud-hidden-bottom');
+        document.getElementById('speaker-notes-drawer').classList.add('hidden');
+      }
+
+      const updateStageDOM = () => {
+        if (viewMode === 'intro') {
+          stage.innerHTML = renderIntroPortal();
+        } else if (viewMode === 'outro') {
+          stage.innerHTML = renderOutroCurtain();
+        } else {
+          stage.innerHTML = slides[currentSlide].render(currentSubStep);
+        }
+      };
+
+      if (useMorph && document.startViewTransition) {
+        document.startViewTransition(() => updateStageDOM());
+      } else {
+        updateStageDOM();
+      }
+    }
+
+    function enterIntroScreen() {
+      viewMode = 'intro';
+      renderView(true);
+    }
+
+    function startPresentationDeck() {
+      viewMode = 'deck';
+      currentSlide = 0;
+      currentSubStep = 0;
+      renderView(true);
+    }
+
+    function enterOutroScreen() {
+      viewMode = 'outro';
+      renderView(true);
+    }
+
+    function nextStep() {
+      if (viewMode === 'intro') {
+        startPresentationDeck();
+        return;
+      }
+      if (viewMode === 'outro') {
+        enterIntroScreen();
+        return;
+      }
+
+      const maxSub = slides[currentSlide].subStepsCount || 1;
+      if (currentSubStep < maxSub - 1) {
+        currentSubStep++;
+        if (currentSlide === 0) {
+          updateSlide1OrbitSmoothly(currentSubStep);
+        } else {
+          renderView(true);
+        }
+      } else if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        currentSubStep = 0;
+        renderView(true);
+      } else {
+        enterOutroScreen();
+      }
+    }
+
+    function prevStep() {
+      if (viewMode === 'outro') {
+        viewMode = 'deck';
+        currentSlide = slides.length - 1;
+        currentSubStep = (slides[currentSlide].subStepsCount || 1) - 1;
+        renderView(true);
+        return;
+      }
+      if (viewMode === 'intro') {
+        return;
+      }
+
+      if (currentSubStep > 0) {
+        currentSubStep--;
+        if (currentSlide === 0) {
+          updateSlide1OrbitSmoothly(currentSubStep);
+        } else {
+          renderView(true);
+        }
+      } else if (currentSlide > 0) {
+        currentSlide--;
+        currentSubStep = (slides[currentSlide].subStepsCount || 1) - 1;
+        renderView(true);
+      } else {
+        enterIntroScreen();
+      }
+    }
+
+    function goToSlide(idx) {
+      viewMode = 'deck';
+      currentSlide = idx;
+      currentSubStep = 0;
+      renderView(true);
+    }
+
+    function jumpToSubStep(subIdx) {
+      if (subIdx === currentSubStep) return;
+      currentSubStep = subIdx;
+      if (viewMode === 'deck' && currentSlide === 0) {
+        updateSlide1OrbitSmoothly(currentSubStep);
+      } else {
+        renderView(true);
+      }
+    }
+
+    function toggleSpeakerNotes() {
+      if (viewMode !== 'deck') return;
+      document.getElementById('speaker-notes-drawer').classList.toggle('hidden');
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextStep();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevStep();
+      } else if (e.key.toLowerCase() === 'n') {
+        toggleSpeakerNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullScreen();
+      }
+    });
+
+    initDots();
+    renderView(false);
+  </script>
+</body>
+</html>
