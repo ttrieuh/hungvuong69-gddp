@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Lễ Thành Hầu Nguyễn Hữu Cảnh | Bản Điện Thoại</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background: #070605;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh; /* dynamic viewport height for mobile browsers */
+      position: relative;
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    /* =========================================================================
+       IFRAME: Renders index.html at desktop resolution
+       The iframe has its own viewport = 1440×810, so Tailwind's lg: breakpoints
+       kick in correctly inside it. We then CSS-transform scale it to fit phone.
+       ========================================================================= */
+    #presentation-frame {
+      width: 1440px;
+      height: 810px;
+      border: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+      background: #070605;
+    }
+
+    /* =========================================================================
+       TOUCH NAVIGATION ZONES
+       Tap left half = previous, tap right half = next
+       ========================================================================= */
+    .touch-zone {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      cursor: pointer;
+    }
+    .touch-zone-left {
+      left: 0;
+      width: 50%;
+    }
+    .touch-zone-right {
+      right: 0;
+      width: 50%;
+    }
+
+    /* Visual feedback on tap */
+    .touch-zone .tap-feedback {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.3);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(212, 175, 55, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      pointer-events: none;
+    }
+    .touch-zone-left .tap-feedback { left: 12px; }
+    .touch-zone-right .tap-feedback { right: 12px; }
+    .touch-zone:active .tap-feedback { opacity: 1; }
+    .tap-feedback svg {
+      width: 22px;
+      height: 22px;
+      color: #fde047;
+    }
+
+    /* =========================================================================
+       ORIENTATION PROMPT (portrait mode on phones)
+       ========================================================================= */
+    #orientation-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(7, 6, 5, 0.97);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      text-align: center;
+      padding: 24px;
+    }
+    @keyframes rotateHintAnim {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-90deg); }
+      75% { transform: rotate(-90deg); }
+    }
+    #orientation-overlay svg {
+      width: 72px;
+      height: 72px;
+      color: #d4af37;
+      animation: rotateHintAnim 2s ease-in-out infinite;
+    }
+
+    /* =========================================================================
+       FULLSCREEN PROMPT
+       ========================================================================= */
+    #fs-prompt {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      padding: 12px 24px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(185, 28, 28, 0.2));
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      backdrop-filter: blur(14px);
+      color: #fde68a;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      animation: pulseFS 2s ease-in-out infinite;
+    }
+    @keyframes pulseFS {
+      0%, 100% { box-shadow: 0 0 16px rgba(212, 175, 55, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.45); }
+    }
+
+    /* =========================================================================
+       SLIDE INDICATOR (small dots at bottom center)
+       ========================================================================= */
+    #slide-indicator {
+      position: fixed;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 150;
+      display: flex;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(7, 6, 5, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #slide-indicator.visible {
+      opacity: 1;
+    }
+    .indicator-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(168, 162, 158, 0.35);
+      transition: all 0.3s ease;
+    }
+    .indicator-dot.active {
+      width: 18px;
+      border-radius: 10px;
+      background: #d4af37;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- The desktop presentation rendered at 1440×810 inside an iframe.
+       width="1440" attribute is CRITICAL: it tells the mobile browser the iframe
+       needs a 1440px-wide viewport, so Tailwind's lg: breakpoints work inside. -->
+  <iframe
+    id="presentation-frame"
+    src="index.html"
+    width="1440"
+    height="810"
+    scrolling="no"
+    allow="fullscreen"
+  ></iframe>
+
+  <!-- Touch zones overlay -->
+  <div class="touch-zone touch-zone-left" id="tz-left">
+    <div class="tap-feedback">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </div>
+  </div>
+  <div class="touch-zone touch-zone-right" id="tz-right">
+    <div class="tap-feedback">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Orientation prompt -->
+  <div id="orientation-overlay">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="4" y="2" width="16" height="20" rx="2" stroke-linecap="round"/>
+      <path d="M20 8l2-2m0 0l2 2m-2-2v6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div style="font-size:18px;font-weight:800;color:#fde047;margin-bottom:6px;">Xoay Ngang Điện Thoại</div>
+      <div style="font-size:13px;color:#a8a29e;line-height:1.5;">Để xem bài thuyết trình tốt nhất,<br>hãy xoay điện thoại sang chế độ ngang</div>
+    </div>
+    <button onclick="this.parentElement.style.display='none'" style="margin-top:10px;padding:10px 22px;border-radius:12px;background:linear-gradient(135deg,#d4af37,#b91c1c);color:#070605;font-weight:800;font-size:12px;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;">
+      Bỏ Qua
+    </button>
+  </div>
+
+  <!-- Fullscreen prompt -->
+  <div id="fs-prompt" onclick="enterFullscreen()">
+    ⛶ Nhấn để Toàn Màn Hình
+  </div>
+
+  <!-- Slide indicator dots -->
+  <div id="slide-indicator"></div>
+
+  <script>
+    const iframe = document.getElementById('presentation-frame');
+    const DESIGN_W = 1440;
+    const DESIGN_H = 810;
+
+    // =========================================================================
+    // SCALE IFRAME TO FIT VIEWPORT
+    // =========================================================================
+    function scaleToFit() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scaleX = vw / DESIGN_W;
+      const scaleY = vh / DESIGN_H;
+      const scale = Math.min(scaleX, scaleY);
+
+      iframe.style.transform = `scale(${scale})`;
+
+      // Center the iframe if there's leftover space on either axis
+      const scaledW = DESIGN_W * scale;
+      const scaledH = DESIGN_H * scale;
+      iframe.style.left = Math.max(0, (vw - scaledW) / 2) + 'px';
+      iframe.style.top  = Math.max(0, (vh - scaledH) / 2) + 'px';
+    }
+
+    // Run on load, resize, orientationchange
+    iframe.addEventListener('load', scaleToFit);
+    window.addEventListener('resize', scaleToFit);
+    window.addEventListener('orientationchange', () => setTimeout(scaleToFit, 200));
+    scaleToFit();
+
+    // =========================================================================
+    // SEND COMMANDS TO IFRAME (via postMessage)
+    // =========================================================================
+    function sendCmd(cmd) {
+      iframe.contentWindow.postMessage(cmd, '*');
+    }
+
+    // Touch zone tap handlers
+    document.getElementById('tz-left').addEventListener('click', () => sendCmd('prev'));
+    document.getElementById('tz-right').addEventListener('click', () => sendCmd('next'));
+
+    // =========================================================================
+    // SWIPE GESTURE SUPPORT
+    // =========================================================================
+    let swStartX = 0, swStartY = 0, swStartT = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      swStartX = e.touches[0].clientX;
+      swStartY = e.touches[0].clientY;
+      swStartT = Date.now();
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - swStartX;
+      const dy = e.changedTouches[0].clientY - swStartY;
+      const dt = Date.now() - swStartT;
+
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 400) {
+        sendCmd(dx < 0 ? 'next' : 'prev');
+      }
+    }, { passive: true });
+
+    // =========================================================================
+    // PREVENT ZOOM & PULL-TO-REFRESH
+    // =========================================================================
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+
+    document.body.addEventListener('touchmove', (e) => {
+      if (e.touches.length <= 1) e.preventDefault();
+    }, { passive: false });
+
+    // =========================================================================
+    // ORIENTATION PROMPT
+    // =========================================================================
+    function checkOrientation() {
+      const overlay = document.getElementById('orientation-overlay');
+      if (window.innerWidth < window.innerHeight && window.innerWidth < 600) {
+        overlay.style.display = 'flex';
+      } else {
+        overlay.style.display = 'none';
+      }
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 300));
+    checkOrientation();
+
+    // =========================================================================
+    // FULLSCREEN
+    // =========================================================================
+    function enterFullscreen() {
+      const el = document.documentElement;
+      const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (rfs) {
+        rfs.call(el).then(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        }).catch(() => {});
+      }
+      document.getElementById('fs-prompt').style.display = 'none';
+    }
+
+    function showFullscreenPrompt() {
+      const p = document.getElementById('fs-prompt');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        p.style.display = 'block';
+      } else {
+        p.style.display = 'none';
+      }
+    }
+    document.addEventListener('fullscreenchange', showFullscreenPrompt);
+    document.addEventListener('webkitfullscreenchange', showFullscreenPrompt);
+    showFullscreenPrompt();
+
+    // =========================================================================
+    // SLIDE INDICATOR (listen for slide changes from iframe)
+    // =========================================================================
+    const indicatorEl = document.getElementById('slide-indicator');
+    let indicatorTimeout;
+
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'slideChange') {
+        updateIndicator(e.data.current, e.data.total, e.data.mode);
+      }
+    });
+
+    function updateIndicator(current, total, mode) {
+      if (mode !== 'deck') {
+        indicatorEl.classList.remove('visible');
+        return;
+      }
+
+      // Build dots
+      let html = '';
+      for (let i = 0; i < total; i++) {
+        html += `<div class="indicator-dot ${i === current ? 'active' : ''}"></div>`;
+      }
+      indicatorEl.innerHTML = html;
+      indicatorEl.classList.add('visible');
+
+      // Auto-hide after 2 seconds
+      clearTimeout(indicatorTimeout);
+      indicatorTimeout = setTimeout(() => {
+        indicatorEl.classList.remove('visible');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
