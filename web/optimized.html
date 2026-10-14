@@ -408,116 +408,16 @@
     }
 
     /* =========================================================================
-       MOBILE RESPONSIVE (Landscape phone screens)
+       MOBILE: SCALE ENTIRE PAGE TO FIT (like reveal.js)
+       When on a small screen, we render at desktop resolution (1440×810)
+       and CSS-transform scale the whole page down to fit the viewport.
+       This preserves EXACTLY the desktop layout.
        ========================================================================= */
-    @media (max-width: 900px) {
-      /* Scale down fonts globally */
-      .font-serif-display {
-        line-height: 1.15;
-      }
-
-      /* HUD compact */
-      #top-hud {
-        padding: 4px 10px;
-      }
-      #top-hud .text-xs {
-        font-size: 10px;
-      }
-      #bottom-hud {
-        padding: 4px 10px;
-      }
-
-      /* Main stage take full space */
-      #slide-stage {
-        padding-left: 8px;
-        padding-right: 8px;
-        margin-top: 0;
-      }
-
-      /* Nav dots smaller */
-      .nav-dot {
-        height: 7px;
-        width: 7px;
-      }
-      .nav-dot.active {
-        width: 24px;
-      }
-
-      /* Slide counter */
-      #slide-counter {
-        font-size: 16px;
-      }
-      #slide-chapter {
-        font-size: 9px;
-        max-width: 160px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    @media (max-height: 500px) {
-      /* Ultra-short screens (phones in landscape) */
-      #top-hud {
-        padding-top: 2px;
-        padding-bottom: 2px;
-      }
-      #bottom-hud {
-        padding-top: 2px;
-        padding-bottom: 2px;
-      }
-      #slide-stage {
-        margin-top: -4px;
-      }
-
-      /* Scale down statue images */
-      .statue-hero-img {
-        height: 280px;
-      }
-
-      /* Scale down lacquer panels */
-      .lacquer-panel {
-        padding: 12px;
-      }
-    }
-
-    @media (max-width: 900px) and (orientation: landscape) {
-      /* Force content to fit landscape phone screen */
-      body {
-        font-size: 13px;
-      }
-
-      .statue-hero-img {
-        height: 260px;
-      }
-
-      /* Intro portal adjustments */
-      #slide-stage .grid-cols-12 {
-        gap: 12px;
-      }
-
-      /* Slide 1 statue area */
-      #s1-clean-stage {
-        height: auto !important;
-        min-height: 0;
-      }
-      #s1-clean-stage > div:last-child {
-        height: auto;
-        min-height: 280px;
-      }
-
-      /* Plaque panels on mobile */
-      .editorial-plaque {
-        padding: 10px 12px;
-      }
-      .editorial-plaque h2 {
-        font-size: 18px !important;
-      }
-
-      /* Counter balance text */
-      .counter-balance-wing .font-serif-display {
-        font-size: 36px !important;
-      }
+    body.mobile-scaled {
+      width: 1440px;
+      height: 810px;
+      overflow: hidden;
+      transform-origin: top left;
     }
 
     /* Small mobile portrait - show orientation prompt */
@@ -532,11 +432,6 @@
       .touch-nav-zone {
         display: none;
       }
-    }
-
-    /* Mobile auto-scale container */
-    #slide-stage.mobile-scaled {
-      transform-origin: top center;
     }
   </style>
 </head>
@@ -1776,37 +1671,44 @@
     document.addEventListener('fullscreenchange', showMobileFullscreenPrompt);
     document.addEventListener('webkitfullscreenchange', showMobileFullscreenPrompt);
 
-    // Auto-scale content for mobile landscape
-    function autoScaleMobile() {
-      const stage = document.getElementById('slide-stage');
-      if (!stage) return;
+    // =========================================================================
+    // WHOLE-PAGE SCALE (reveal.js approach)
+    // Render at fixed desktop resolution 1440×810, then scale to fit viewport.
+    // This guarantees the phone view is pixel-identical to the desktop view.
+    // =========================================================================
+    const DESIGN_W = 1440;
+    const DESIGN_H = 810;
 
-      if (isMobileScreen() && window.innerWidth > window.innerHeight) {
-        // Landscape phone: scale content to fit
-        const viewH = window.innerHeight;
-        const viewW = window.innerWidth;
-        // The design was made for ~900px height, scale down if needed
-        const scaleY = Math.min(1, viewH / 720);
-        const scaleX = Math.min(1, viewW / 1200);
+    function autoScaleMobile() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // Only apply scaling on touch devices or small screens
+      if (isTouchDevice || vw < DESIGN_W || vh < DESIGN_H) {
+        const scaleX = vw / DESIGN_W;
+        const scaleY = vh / DESIGN_H;
         const scale = Math.min(scaleX, scaleY);
+
         if (scale < 0.98) {
-          stage.classList.add('mobile-scaled');
-          stage.style.transform = `scale(${scale})`;
-          // Compensate height to prevent overflow
-          stage.style.height = `${100 / scale}%`;
-          stage.style.maxHeight = `${100 / scale}%`;
+          document.body.classList.add('mobile-scaled');
+          document.body.style.transform = `scale(${scale})`;
+          document.body.style.transformOrigin = 'top left';
+          document.body.style.width = DESIGN_W + 'px';
+          document.body.style.height = DESIGN_H + 'px';
         } else {
-          stage.classList.remove('mobile-scaled');
-          stage.style.transform = '';
-          stage.style.height = '';
-          stage.style.maxHeight = '';
+          resetScale();
         }
       } else {
-        stage.classList.remove('mobile-scaled');
-        stage.style.transform = '';
-        stage.style.height = '';
-        stage.style.maxHeight = '';
+        resetScale();
       }
+    }
+
+    function resetScale() {
+      document.body.classList.remove('mobile-scaled');
+      document.body.style.transform = '';
+      document.body.style.transformOrigin = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
     }
 
     // Prevent accidental zoom on double-tap
